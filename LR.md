@@ -607,7 +607,7 @@ SOME(SELECT id from companies where count_of_workers <= 100000)
 ## Операторы `UNION` `INTERSECT` `EXCEPT`
 
 Запрос 1:
-- Назначение: Совмещение результатов двух запросов по поиску по компаниям
+- Назначение: Совмещение результатов двух запросов поиска моделей по id компании
 - Запрос:
 ```sql
 SELECT * FROM models WHERE company_id IN (1, 2)
@@ -635,7 +635,7 @@ SELECT * FROM models WHERE company_id IN (2, 3)
 </div>
 
 Запрос 3:
-- Назначение: Совмещение результатов двух запросов по поиску по компаниям
+- Назначение: Пересечение результатов двух запросов поиска моделей по id компании
 - Запрос:
 ```sql
 SELECT * FROM models WHERE company_id IN (1, 2)

@@ -39,7 +39,7 @@
 
 [Создание БД](https://github.com/RoKivals/DataBases_MAI/blob/main/bd.sql)
 
-[Отчёт по ЛР](https://github.com/RoKivals/DataBases_MAI/blob/main/BD_requests.md) 
+[Отчёт по ЛР](https://github.com/RoKivals/DataBases_MAI/blob/main/LR.md) 
 
 ## Курсовой проект:
 Задание: Создание GUI-оболочки для БД, используемой в лабораторных работах (допускаются дополнительные правки и изменения)
