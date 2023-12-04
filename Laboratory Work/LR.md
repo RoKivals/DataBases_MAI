@@ -314,19 +314,21 @@ AND models.company_id = (select id from companies where name = 'Audi')
 - Назначение: Узнать среднее количество работников среди компаний с головным офисов в определённых городах
 - Запрос:
 ```sql
-SELECT AVG(count_of_workers) from companies where office IN ('Munich', 'Hiroshima', 'Zuffenhausen')
+SELECT CEIL(AVG(count_of_workers)) from companies 
+where office IN ('Munich', 'Hiroshima', 'Zuffenhausen')
 ```
 - Результат:
 <div style="text-align: center;">
   
-  [![image4.png](https://i.postimg.cc/c15q5zwN/image4.png)](https://postimg.cc/z3WPy0xd)
+  [![image4.png](https://i.postimg.cc/pd1D96dP/image.png)](https://postimg.cc/KKBKwQLW)
 </div>
 
 Запрос 3:
 - Назначение: Узнать название компании с минимальным количество работников
 - Запрос:
 ```sql
-SELECT name from companies where count_of_workers = (select MIN(count_of_workers) from companies)
+SELECT name from companies 
+where count_of_workers = (select MIN(count_of_workers) from companies)
 ```
 - Результат:
 <div style="text-align: center;">
@@ -365,7 +367,8 @@ SELECT name as company, extract(year from creation_date) AS foundation_year from
 - Назначение: Вывести название компании и дату её основания в формате `ГГГГ-Мес`
 - Запрос:
 ```sql
-SELECT name as company, TO_CHAR(creation_date, 'YYYY-Mon') AS foundation_date from companies
+SELECT name as company, 
+TO_CHAR(creation_date, 'YYYY-Mon') AS foundation_date from companies
 ```
 - Результат:
 <div style="text-align: center;">
@@ -379,7 +382,8 @@ SELECT name as company, TO_CHAR(creation_date, 'YYYY-Mon') AS foundation_date fr
 - Назначение: Вывести названия моделей и названия рынков, на которых они продаются
 - Запрос:
 ```sql
-SELECT models.name, sales_markets.market_zone from models, sales_markets, models_sales_markets_relation
+SELECT models.name, sales_markets.market_zone 
+from models, sales_markets, models_sales_markets_relation
 WHERE (models.id = models_sales_markets_relation.model_id
       AND sales_markets.id = models_sales_markets_relation.sales_market_id)
 ```
@@ -424,7 +428,8 @@ GROUP BY companies.name
 - Назначение: Узнать название компании с минимальным количество работников
 - Запрос:
 ```sql
-SELECT name from companies where count_of_workers = (select MIN(count_of_workers) from companies)
+SELECT name from companies 
+where count_of_workers = (select MIN(count_of_workers) from companies)
 ```
 - Результат:
 <div style="text-align: center;">
@@ -465,7 +470,9 @@ where models.release_date - (SELECT creation_date from companies
 - Назначение: Вывести компании и рынки сбыта, в которых у этой компании представлено наибольшее количество моделей
 - Запрос:
 ```sql
-WITH companies_markets AS (SELECT companies.name, market_zone, COUNT(market_zone) as market_models from companies JOIN models
+WITH companies_markets AS 
+(SELECT companies.name, market_zone, COUNT(market_zone) as market_models 
+from companies JOIN models
 ON models.company_id = companies.id
 JOIN models_sales_markets_relation
 ON models.id = models_sales_markets_relation.model_id
@@ -476,7 +483,8 @@ ORDER BY companies.name)
 
 
 SELECT name, market_zone from companies_markets CM1 where
-market_models = (SELECT MAX(market_models) from companies_markets CM2 WHERE CM1.name = CM2.name)
+market_models = (SELECT MAX(market_models) from companies_markets CM2 
+WHERE CM1.name = CM2.name)
 ```
 - Результат:
 <div style="text-align: center;">
@@ -517,7 +525,9 @@ JOIN sales_markets ON sales_markets.id = models_sales_markets_relation.sales_mar
 - Назначение: Вывести компании и кол-во представленных ими моделей на каждом из рынков сбыта
 - Запрос:
 ```sql
-WITH companies_markets AS (SELECT companies.name, market_zone, COUNT(market_zone) as market_models from companies JOIN models
+WITH companies_markets AS 
+(SELECT companies.name, market_zone, COUNT(market_zone) as market_models 
+from companies JOIN models
 ON models.company_id = companies.id
 JOIN models_sales_markets_relation
 ON models.id = models_sales_markets_relation.model_id
