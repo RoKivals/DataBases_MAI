@@ -85,6 +85,7 @@ END;
 
 CREATE UNIQUE INDEX IF NOT EXISTS uix_companies_name ON companies (name);
 CREATE UNIQUE INDEX IF NOT EXISTS uix_body_type_name ON body_type (name);
+CREATE UNIQUE INDEX IF NOT EXISTS uix_model_name ON models_range (model_name);
 CREATE UNIQUE INDEX IF NOT EXISTS uix_sales_market_market_zone ON sales_markets (market_zone);
 CREATE UNIQUE INDEX IF NOT EXISTS uix_models_sales_markets_relation ON models_sales_markets_relation (model_id, sales_market_id);
 
@@ -118,11 +119,11 @@ INTO body_type (name) VALUES
 
 INSERT
 INTO companies (name, office, creation_date, count_of_workers) VALUES
-('Acura'),
-('Alfa Romeo'),
-('Aston Martin'),
+('Acura', 'Torrance', '27.03.1986', 23805),
+('Alfa Romeo', 'Turin', '24.06.1910', 3000),
+('Aston Martin', 'Warwick', '15.01.1913', 2473),
 ('Audi', 'Ingolstadt', '16.07.1909', 87000),
-('Bentley'),
+('Bentley', 'Crewe'),
 ('BMW', 'Munich', '07.03.1916', 118909),
 ('Bugatti'),
 ('BYD'),
