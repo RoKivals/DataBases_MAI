@@ -21,7 +21,7 @@ CREATE TABLE models_range (
 	id bigserial primary key,
 	company_id bigint NOT NULL,
 	model_name varchar(55) NOT NULL
-)
+);
 
 CREATE TABLE companies(
     id bigserial primary key,
@@ -34,6 +34,7 @@ CREATE TABLE companies(
 CREATE TABLE specification (
     id bigserial primary key,
     model_id bigint NOT NULL,
+	generation varchar(55),
     start_of_production date,
     end_of_production date,
     engine engine_type,
@@ -74,14 +75,22 @@ CREATE TABLE model_body_type_relation (
 	FOREIGN KEY (body_type_id) REFERENCES body_type
 	ON DELETE CASCADE
 	ON UPDATE CASCADE
-)
+);
+
+CREATE FUNCTION set_model_body_type_relation_function()
+RETURNS TRIGGER AS 
+$$
+BEGIN
+    INSERT INTO model_body_type_relation (model_id, body_type_id) VALUES (NEW.model_id, NEW.body_type);
+END
+$$
+LANGUAGE plpgsql;
 
 CREATE TRIGGER model_body_type_relation_insert
 AFTER INSERT ON specification
 FOR EACH ROW
-BEGIN
-    INSERT INTO model_body_type_relation (model_id, body_type_id) VALUES (NEW.model_id, NEW.body_type);
-END;
+EXECUTE FUNCTION set_model_body_type_relation_function();
+
 
 CREATE UNIQUE INDEX IF NOT EXISTS uix_companies_name ON companies (name);
 CREATE UNIQUE INDEX IF NOT EXISTS uix_body_type_name ON body_type (name);
@@ -123,152 +132,73 @@ INTO companies (name, office, creation_date, count_of_workers) VALUES
 ('Alfa Romeo', 'Turin', '24.06.1910', 3000),
 ('Aston Martin', 'Warwick', '15.01.1913', 2473),
 ('Audi', 'Ingolstadt', '16.07.1909', 87000),
-('Bentley', 'Crewe'),
+('Bentley', 'Crewe', '18.01.1919', 3600),
 ('BMW', 'Munich', '07.03.1916', 118909),
-('Bugatti'),
-('BYD'),
-('Cadillac'),
-('Chevrolet'),
-('Crysler'),
-('Citroen'),
-('Dacia'),
-('Dodge'),
-('Ferrari'),
-('Fiat'),
+('Bugatti', 'Molsheim', '01.01.1909', 1100),
+('BYD', 'Shaanxi Province', '10.02.1995', 288200),
+('Cadillac', 'Detroit', '22.08.1902', 11000),
+('Chevrolet', 'Detroit', '03.11.1911', 20000),
+('Crysler', 'Auburn Hills', '06.06.1925', 56900),
+('Citroen', 'Poissy', '04.06.1919', 197000),
+('Dacia', 'Mioveni', '01.09.1966', 12209),
+('Dodge', 'Auburn Hills', '14.12.1900', 235000),
+('Ferrari', 'Maranello', '13.09.1939', 4571),
+('Fiat', 'Turin', '11.07.1899', 214836),
 ('Ford', 'Las Vegas', '16.06.1903', 183000),
-('Haval'),
-('Honda'),
-('Hummer'),
-('Infiniti'),
-('Jeep'),
-('KIA'),
-('Lada'),
-('Lamborghini'),
-('Lexus'),
-('Lotus'),
+('Haval', 'Baoding', '29.03.2013', 25000),
+('Honda', 'Tokyo', '24.09.1948', 197039),
+('Hummer', 'Detroit', '22.01.1992', 1000),
+('Infiniti', 'Yokohama', '08.11.1989', 8000),
+('Jeep', 'Auburn Hills', '01.01.1941', 7500),
+('KIA', 'Seoul', '21.12.1944', 51975),
+('Lada', 'Tolyatti', '20.07.1966', 32500),
+('Lamborghini', 'Sant''Agata Bolognese', '30.10.1963', 1779),
+('Lexus', 'Nagoya', '01.09.1989', 70000),
+('Lotus', 'Hethel', '01.01.1952', 1385),
 ('Maserati', 'Modena', '01.12.1914', 1100),
 ('Mazda', 'Hiroshima', '30.01.1920', 49786),
 ('Mercedes-Benz', 'Stuttgart', '28.06.1926', 145436),
-('Mini'),
-('Pagani'),
+('Mini', 'Farnborough', '01.04.1952', 14000),
+('Pagani', 'San Cesario sul Panaro', '01.01.1992', 162),
 ('Porsche', 'Stuttgart', '06.03.1931', 36359),
-('Rolls-Royce'),
-('Skoda'),
-('Subaru'),
-('Tesla'),
-('Toyota'),
+('Rolls-Royce', 'Goodwood', '01.03.1998', 1300),
+('Skoda', 'Mladá Boleslav', '17.12.1895', 36032),
+('Subaru', 'Shibuya', '15.07.1953', 16961),
+('Tesla', 'Austin', '01.07.2003', 127855),
+('Toyota', 'Koromo', '28.08.1937', 366283),
 ('Volkswagen', 'Wolfsburg', '28.05.1937', 670000);
 
-INSERT INTO models_range(company_id, name)
-SELECT (id, UNNEST (ARRAY['Golf', 'ID.4']) from companies where name = 'Volkswagen' LIMIT 1);
+INSERT INTO models_range(company_id, model_name) VALUES
+SELECT id, UNNEST (ARRAY['CSX', 'Integra', 'MDX', 'NSX']) from companies where name = 'Acura';
 
-(1, 'Golf'),
-(1, 'ID.4'),
-(1, 'Golf'),
-(1, 'Golf'),
-(1, 'Golf'),
-(1, 'Golf'),
-(1, 'Golf'),
-(1, 'Golf'),
-(1, 'Golf'),
+INSERT INTO models_range(company_id, model_name) VALUES
+SELECT id, UNNEST (ARRAY['Bulldog', 'DB11', 'DB12', 'DBS', 'One-77']) from companies where name = 'Aston Martin';
 
+INSERT INTO models_range(company_id, model_name) VALUES
+SELECT id, UNNEST (ARRAY['80', '100', '200', 'A4', 'A6', 'A7', 'A8', 'Q8', 'R8', 'RS6']) from companies where name = 'Audi';
 
-INSERT
-INTO models (company_id, name, release_date, body_type) VALUES 
-(1, 'Golf', '01.01.1974', 1),
-(1, 'ID.4', '01.01.2020', 9),
-(2, 'A1', '01.01.2010', 1),
-(2, 'A2', '01.01.1999', 1),
-(2, 'A4', '01.01.1994', 3),
-(2, 'A5', '01.06.2007', 2),
-(2, 'A6', '01.01.1994', 3),
-(2, 'A7', '01.01.2010', 5),
-(2, 'A8', '01.01.1994', 3),
-(3, 'Cayenne', '01.12.2002', 9),
-(3, '911', '01.01.1965', 8),
-(4, 'Focus', '01.01.1998', 1),
-(4, 'F-150', '01.01.1979', 11),
-(5, '3 Series', '01.01.1975', 4),
-(5, '7 Series', '01.01.1977', 3),
-(6, 'E-Class', '01.01.1993', 3),
-(6, 'A-Class', '01.01.1997', 1),
-(7, 'MX-5', '01.01.1989', 7),
-(7, 'RX-7', '01.01.1978', 2),
-(8, 'Ghibli', '01.01.1967', 3);
+INSERT INTO models_range(company_id, model_name) VALUES
+SELECT id, UNNEST (ARRAY['Series 1', 'Series 3', 'Series 5', 'Series 7', 'i8', 'Isetta', 'M6', 'M8', 'X5', 'Z4']) 
+from companies where name = 'BMW';
 
-INSERT 
-INTO models_sales_markets_relation (model_id, sales_market_id) VALUES
-(1, 1),
-(1, 2),
-(1, 3),
-(1, 4),
-(1, 5),
-(1, 6),
-(2, 1),
-(2, 2),
-(2, 4),
-(2, 5),
-(3, 1),
-(3, 2),
-(3, 4),
-(4, 1),
-(4, 3),
-(5, 1),
-(5, 4),
-(6, 1),
-(6, 2),
-(6, 4),
-(6, 5),
-(7, 1),
-(7, 2),
-(7, 3),
-(7, 4),
-(7, 5),
-(7, 7),
-(8, 1),
-(8, 2),
-(8, 3),
-(8, 4),
-(8, 5),
-(8, 7),
-(9, 1),
-(9, 2),
-(9, 5),
-(10, 1),
-(10, 2),
-(10, 4),
-(10, 5),
-(11, 1),
-(11, 2),
-(11, 4),
-(11, 5),
-(12, 1),
-(12, 2),
-(12, 5),
-(12, 6),
-(12, 7),
-(13, 5),
-(13, 6),
-(14, 1),
-(14, 2),
-(14, 4),
-(14, 5),
-(15, 1),
-(15, 4),
-(15, 5),
-(16, 1),
-(16, 2),
-(16, 5),
-(17, 1),
-(17, 2),
-(18, 1),
-(18, 3),
-(18, 4),
-(18, 5),
-(18, 6),
-(18, 7),
-(19, 3),
-(19, 4),
-(20, 1),
-(20, 2),
-(20, 5);
+INSERT INTO models_range(company_id, model_name) VALUES
+SELECT id, UNNEST (ARRAY['300 SLR', 'AMG GT', 'C Class', 'CLA', 'E Class', 'EQB', 'G Class', 'GLS', 'S Class', 'W124']) 
+from companies where name = 'Mercedes-Benz';
+
+INSERT INTO models_range(company_id, model_name) VALUES
+SELECT id, UNNEST (ARRAY['356', '718', '911', '918', '959', 'Boxster', 'Cayenne', 'Cayman', 'Macan', 'Taycan']) 
+from companies where name = 'Porsche';
+
+INSERT INTO models_range(company_id, model_name) VALUES
+SELECT id, UNNEST (ARRAY['Amarok', 'Arteon', 'Beetle', 'Bora', 'Caddy', 'Golf', 'ID.7', 'Jetta', 'Passat', 'Touareg']) 
+from companies where name = 'Volkswagen';
+
+WITH model AS (SELECT id from models_range WHERE model_name = 'NSX')
+INSERT INTO 
+specification(model_id, generation, start_of_production, end_of_production, engine, engine_displacement, HP, body_type) VALUES
+(model.id, 'NSX II', '01.01.2022', NULL, 'hybrid', 3493, 520, 2);
+
+WITH model AS (SELECT id from models_range WHERE model_name = 'DBS')
+INSERT INTO 
+specification(model_id, generation, start_of_production, end_of_production, engine, engine_displacement, HP, body_type) VALUES
+(model.id, 'NSX II', '01.01.2022', NULL, 'hybrid', 3493, 520, 2);
