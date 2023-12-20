@@ -17,7 +17,7 @@ CREATE TABLE auth.users (
 	id bigserial primary key,
 	login varchar(55),
 	password varchar(100),
-	category user_type
+	category auth.user_type
 );
 
 CREATE TYPE engine_type AS ENUM (
@@ -96,6 +96,7 @@ RETURNS TRIGGER AS
 $$
 BEGIN
     INSERT INTO model_body_type_relation (model_id, body_type_id) VALUES (NEW.model_id, NEW.body_type);
+	RETURN NEW;
 END
 $$
 LANGUAGE plpgsql;
@@ -182,37 +183,32 @@ INTO companies (name, office, creation_date, count_of_workers) VALUES
 ('Toyota', 'Koromo', '28.08.1937', 366283),
 ('Volkswagen', 'Wolfsburg', '28.05.1937', 670000);
 
-INSERT INTO models_range(company_id, model_name) VALUES
+INSERT INTO models_range(company_id, model_name)
 SELECT id, UNNEST (ARRAY['CSX', 'Integra', 'MDX', 'NSX']) from companies where name = 'Acura';
 
-INSERT INTO models_range(company_id, model_name) VALUES
+INSERT INTO models_range(company_id, model_name)
 SELECT id, UNNEST (ARRAY['Bulldog', 'DB11', 'DB12', 'DBS', 'One-77']) from companies where name = 'Aston Martin';
 
-INSERT INTO models_range(company_id, model_name) VALUES
+INSERT INTO models_range(company_id, model_name)
 SELECT id, UNNEST (ARRAY['80', '100', '200', 'A4', 'A6', 'A7', 'A8', 'Q8', 'R8', 'RS6']) from companies where name = 'Audi';
 
-INSERT INTO models_range(company_id, model_name) VALUES
+INSERT INTO models_range(company_id, model_name)
 SELECT id, UNNEST (ARRAY['Series 1', 'Series 3', 'Series 5', 'Series 7', 'i8', 'Isetta', 'M6', 'M8', 'X5', 'Z4']) 
 from companies where name = 'BMW';
 
-INSERT INTO models_range(company_id, model_name) VALUES
+INSERT INTO models_range(company_id, model_name)
 SELECT id, UNNEST (ARRAY['300 SLR', 'AMG GT', 'C Class', 'CLA', 'E Class', 'EQB', 'G Class', 'GLS', 'S Class', 'W124']) 
 from companies where name = 'Mercedes-Benz';
 
-INSERT INTO models_range(company_id, model_name) VALUES
+INSERT INTO models_range(company_id, model_name)
 SELECT id, UNNEST (ARRAY['356', '718', '911', '918', '959', 'Boxster', 'Cayenne', 'Cayman', 'Macan', 'Taycan']) 
 from companies where name = 'Porsche';
 
-INSERT INTO models_range(company_id, model_name) VALUES
+INSERT INTO models_range(company_id, model_name)
 SELECT id, UNNEST (ARRAY['Amarok', 'Arteon', 'Beetle', 'Bora', 'Caddy', 'Golf', 'ID.7', 'Jetta', 'Passat', 'Touareg']) 
 from companies where name = 'Volkswagen';
 
+INSERT INTO 
+specification(model_id, generation, start_of_production, end_of_production, engine, engine_displacement, HP, body_type)
 WITH model AS (SELECT id from models_range WHERE model_name = 'NSX')
-INSERT INTO 
-specification(model_id, generation, start_of_production, end_of_production, engine, engine_displacement, HP, body_type) VALUES
-(model.id, 'NSX II', '01.01.2022', NULL, 'hybrid', 3493, 520, 2);
-
-WITH model AS (SELECT id from models_range WHERE model_name = 'DBS')
-INSERT INTO 
-specification(model_id, generation, start_of_production, end_of_production, engine, engine_displacement, HP, body_type) VALUES
-(model.id, 'NSX II', '01.01.2022', NULL, 'hybrid', 3493, 520, 2);
+SELECT model.id, 'NSX II', '01.01.2022', NULL, 'hybrid', 3493, 520, 2 from model;
