@@ -1,3 +1,6 @@
+DROP TABLE IF EXISTS auth.users;
+DROP TYPE IF EXITST auth.user_type;
+DROP SCHEMA IF EXISTS auth;
 DROP TABLE IF EXISTS specification;
 DROP TABLE IF EXISTS sales_markets;
 DROP TABLE IF EXISTS companies;
