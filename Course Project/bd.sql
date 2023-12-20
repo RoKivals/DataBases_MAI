@@ -6,6 +6,20 @@ DROP TABLE IF EXISTS models_sales_markets_relation;
 DROP TABLE IF EXISTS body_type;
 DROP TYPE IF EXISTS engine_type;
 
+CREATE SCHEMA auth;
+
+CREATE TYPE auth.user_type AS ENUM (
+	'admin',
+	'user'
+);
+
+CREATE TABLE auth.users (
+	id bigserial primary key,
+	login varchar(55),
+	password varchar(100),
+	category user_type
+);
+
 CREATE TYPE engine_type AS ENUM (
 	'hybrid',
 	'electric',
