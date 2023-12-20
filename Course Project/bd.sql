@@ -45,7 +45,8 @@ CREATE TABLE companies(
     name varchar(255) NOT NULL,
     office varchar(255) NOT NULL,
     creation_date date NOT NULL,
-    count_of_workers int
+    count_of_workers int,
+	logo BYTEA
 );
 
 CREATE TABLE specification (
@@ -142,7 +143,8 @@ INTO body_type (name) VALUES
 ('Pickup'),
 ('Limousine'),
 ('Minivan'),
-('Campervan');
+('Campervan'),
+('Quad bike');
 
 INSERT
 INTO companies (name, office, creation_date, count_of_workers) VALUES
@@ -215,3 +217,38 @@ INSERT INTO
 specification(model_id, generation, start_of_production, end_of_production, engine, engine_displacement, HP, body_type)
 WITH model AS (SELECT id from models_range WHERE model_name = 'NSX')
 SELECT model.id, 'NSX II', '01.01.2022', NULL, 'hybrid', 3493, 520, 2 from model;
+
+INSERT INTO 
+specification(model_id, generation, start_of_production, end_of_production, engine, engine_displacement, HP, body_type)
+WITH model AS (SELECT id from models_range WHERE model_name = 'DBS')
+SELECT model.id, 'DBS Superleggera', '01.01.2018', NULL, 'internal combustion engine', 5204, 725, 2 from model;
+
+INSERT INTO 
+specification(model_id, generation, start_of_production, end_of_production, engine, engine_displacement, HP, body_type)
+WITH model AS (SELECT id from models_range WHERE model_name = 'DBS')
+SELECT model.id, 'DBS Superleggera', '01.01.2023', NULL, 'internal combustion engine', 5204, 770, 2 from model;
+
+INSERT INTO 
+specification(model_id, generation, start_of_production, end_of_production, engine, engine_displacement, HP, body_type)
+WITH model AS (SELECT id from models_range WHERE model_name = '200')
+SELECT model.id, '200 (C3, Typ 44,44Q)', '01.01.1989', '01.01.1991', 'internal combustion engine', 2393, 136, 3 from model;
+
+INSERT INTO 
+specification(model_id, generation, start_of_production, end_of_production, engine, engine_displacement, HP, body_type)
+WITH model AS (SELECT id from models_range WHERE model_name = 'A8')
+SELECT model.id, 'A8 (D4,4H facelift 2013)', '01.01.2013', '01.01.2017', 'internal combustion engine', 4134, 385, 3 from model;
+
+INSERT INTO 
+specification(model_id, generation, start_of_production, end_of_production, engine, engine_displacement, HP, body_type)
+WITH model AS (SELECT id from models_range WHERE model_name = 'R8')
+SELECT model.id, 'R8 II Spyder (4S)', '01.01.2017', '01.01.2018', 'internal combustion engine', 5204, 610, 6 from model;
+
+INSERT INTO 
+specification(model_id, generation, start_of_production, end_of_production, engine, engine_displacement, HP, body_type)
+WITH model AS (SELECT id from models_range WHERE model_name = 'Isetta')
+SELECT model.id, '300', '01.01.1955', '01.01.1962', 'internal combustion engine', 295, 13, 15 from model;
+
+INSERT INTO 
+specification(model_id, generation, start_of_production, end_of_production, engine, engine_displacement, HP, body_type)
+WITH model AS (SELECT id from models_range WHERE model_name = 'S Class')
+SELECT model.id, '300', '01.01.1955', '01.01.1962', 'internal combustion engine', 295, 13, 15 from model;
