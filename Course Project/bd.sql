@@ -1,5 +1,5 @@
 DROP TABLE IF EXISTS auth.users;
-DROP TYPE IF EXITST auth.user_type;
+DROP TYPE IF EXISTS auth.user_type;
 DROP SCHEMA IF EXISTS auth;
 DROP TABLE IF EXISTS specification;
 DROP TABLE IF EXISTS sales_markets;
@@ -8,6 +8,7 @@ DROP TABLE IF EXISTS models_range;
 DROP TABLE IF EXISTS models_sales_markets_relation;
 DROP TABLE IF EXISTS body_type;
 DROP TYPE IF EXISTS engine_type;
+DROP FUNCTION IF EXISTS set_model_body_type_relation_function;
 
 CREATE SCHEMA auth;
 
@@ -110,7 +111,6 @@ AFTER INSERT ON specification
 FOR EACH ROW
 EXECUTE FUNCTION set_model_body_type_relation_function();
 
-
 CREATE UNIQUE INDEX IF NOT EXISTS uix_companies_name ON companies (name);
 CREATE UNIQUE INDEX IF NOT EXISTS uix_body_type_name ON body_type (name);
 CREATE UNIQUE INDEX IF NOT EXISTS uix_model_name ON models_range (model_name);
@@ -147,46 +147,46 @@ INTO body_type (name) VALUES
 ('Quad bike');
 
 INSERT
-INTO companies (name, office, creation_date, count_of_workers) VALUES
-('Acura', 'Torrance', '27.03.1986', 23805),
-('Alfa Romeo', 'Turin', '24.06.1910', 3000),
-('Aston Martin', 'Warwick', '15.01.1913', 2473),
-('Audi', 'Ingolstadt', '16.07.1909', 87000),
-('Bentley', 'Crewe', '18.01.1919', 3600),
-('BMW', 'Munich', '07.03.1916', 118909),
-('Bugatti', 'Molsheim', '01.01.1909', 1100),
-('BYD', 'Shaanxi Province', '10.02.1995', 288200),
-('Cadillac', 'Detroit', '22.08.1902', 11000),
-('Chevrolet', 'Detroit', '03.11.1911', 20000),
-('Crysler', 'Auburn Hills', '06.06.1925', 56900),
-('Citroen', 'Poissy', '04.06.1919', 197000),
-('Dacia', 'Mioveni', '01.09.1966', 12209),
-('Dodge', 'Auburn Hills', '14.12.1900', 235000),
-('Ferrari', 'Maranello', '13.09.1939', 4571),
-('Fiat', 'Turin', '11.07.1899', 214836),
-('Ford', 'Las Vegas', '16.06.1903', 183000),
-('Haval', 'Baoding', '29.03.2013', 25000),
-('Honda', 'Tokyo', '24.09.1948', 197039),
-('Hummer', 'Detroit', '22.01.1992', 1000),
-('Infiniti', 'Yokohama', '08.11.1989', 8000),
-('Jeep', 'Auburn Hills', '01.01.1941', 7500),
-('KIA', 'Seoul', '21.12.1944', 51975),
-('Lada', 'Tolyatti', '20.07.1966', 32500),
-('Lamborghini', 'Sant''Agata Bolognese', '30.10.1963', 1779),
-('Lexus', 'Nagoya', '01.09.1989', 70000),
-('Lotus', 'Hethel', '01.01.1952', 1385),
-('Maserati', 'Modena', '01.12.1914', 1100),
-('Mazda', 'Hiroshima', '30.01.1920', 49786),
-('Mercedes-Benz', 'Stuttgart', '28.06.1926', 145436),
-('Mini', 'Farnborough', '01.04.1952', 14000),
-('Pagani', 'San Cesario sul Panaro', '01.01.1992', 162),
-('Porsche', 'Stuttgart', '06.03.1931', 36359),
-('Rolls-Royce', 'Goodwood', '01.03.1998', 1300),
-('Skoda', 'Mladá Boleslav', '17.12.1895', 36032),
-('Subaru', 'Shibuya', '15.07.1953', 16961),
-('Tesla', 'Austin', '01.07.2003', 127855),
-('Toyota', 'Koromo', '28.08.1937', 366283),
-('Volkswagen', 'Wolfsburg', '28.05.1937', 670000);
+INTO companies (name, office, creation_date, count_of_workers, logo) VALUES
+('Acura', 'Torrance', '27.03.1986', 23805, BYTEA('Logos/AcuraPrimary_PCP_BLK_NEW_5-11.jpg')),
+('Alfa Romeo', 'Turin', '24.06.1910', 3000, BYTEA('Logos/png-transparent-alfa-romeo-logo-alfa-romeo-156-car-logo-fiat-alfa-romeo-logo-text-trademark-automobile-repair-shop.png')),
+('Aston Martin', 'Warwick', '15.01.1913', 2473, BYTEA('Logos/Aston-Martin-Logo-2048x1152.jpg')),
+('Audi', 'Ingolstadt', '16.07.1909', 87000, BYTEA('Logos/1636096812_62-papik-pro-p-audi-logotip-foto-62-scaled.jpg')),
+('Bentley', 'Crewe', '18.01.1919', 3600, BYTEA('Logos/1636468838_5-hdpic-club-p-logotip-bentli-5.png')),
+('BMW', 'Munich', '07.03.1916', 118909, BYTEA('Logos/gratis-png-vehiculo-de-lujo-con-logotipo-de-bmw-logotipo-de-bmw-logotipo-de-bmw.png')),
+('Bugatti', 'Molsheim', '01.01.1909', 1100, BYTEA('Logos/bugatti-logo-2560x1440.png')),
+('BYD', 'Shaanxi Province', '10.02.1995', 288200, BYTEA('Logos/img_60426659aba7a-2048x1152.png')),
+('Cadillac', 'Detroit', '22.08.1902', 11000, BYTEA('Logos/1580283058_2-p-logotipi-kadillaka-2.png')),
+('Chevrolet', 'Detroit', '03.11.1911', 20000, BYTEA('Logos/chevrolet_logo_e-motors_ru.jpg')),
+('Crysler', 'Auburn Hills', '06.06.1925', 56900, BYTEA('Logos/Chrysler-Logo.png')),
+('Citroen', 'Poissy', '04.06.1919', 197000, BYTEA('Logos/citroen-logo-black.jpg')),
+('Dacia', 'Mioveni', '01.09.1966', 12209, BYTEA('Logos/Dacia-sign-2015-2021.png')),
+('Dodge', 'Auburn Hills', '14.12.1900', 235000, BYTEA('Logos/Dodge-Silver-Logo.png')),
+('Ferrari', 'Maranello', '13.09.1939', 4571, BYTEA('Logos/ahmx-jimi-9.jpg')),
+('Fiat', 'Turin', '11.07.1899', 214836, BYTEA('Logos/fe809947d6871b86a35a01477a776535.jpg')),
+('Ford', 'Las Vegas', '16.06.1903', 183000, BYTEA('Logos/anz47dko9hu2lkv7my3nv5omslsjaatj.jpg')),
+('Haval', 'Baoding', '29.03.2013', 25000, BYTEA('Logos/Haval-Logo.png')),
+('Honda', 'Tokyo', '24.09.1948', 197039, BYTEA('Logos/honda.png')),
+('Hummer', 'Detroit', '22.01.1992', 1000, BYTEA('Logos/Hummer-Logo-1536x864.png')),
+('Infiniti', 'Yokohama', '08.11.1989', 8000, BYTEA('Logos/infiniti_PNG18.png')),
+('Jeep', 'Auburn Hills', '01.01.1941', 7500, BYTEA('Logos/Jeep-Logo-PNG-File.png')),
+('KIA', 'Seoul', '21.12.1944', 51975, BYTEA('Logos/Kia-Simbolo.png')),
+('Lada', 'Tolyatti', '20.07.1966', 32500, BYTEA('Logos/lada-logo_01.png')),
+('Lamborghini', 'Sant''Agata Bolognese', '30.10.1963', 1779, BYTEA('Logos/36e91f7d76c22d6cd013e099a3faef1f.png')),
+('Lexus', 'Nagoya', '01.09.1989', 70000, BYTEA('Logos/lexus.png')),
+('Lotus', 'Hethel', '01.01.1952', 1385, BYTEA('Logos/lotus-logo-3000x3000.png')),
+('Maserati', 'Modena', '01.12.1914', 1100, BYTEA('Logos/debc2e38ed.png')),
+('Mazda', 'Hiroshima', '30.01.1920', 49786, BYTEA('Logos/1688989344_myskillsconnect-com-p-logotip-mazda-foto-12.png')),
+('Mercedes-Benz', 'Stuttgart', '28.06.1926', 145436, BYTEA('Logos/mb.png')),
+('Mini', 'Farnborough', '01.04.1952', 14000, BYTEA('Logos/844-8446733_datei-mini-logo-svg-mini-logo-black-and.png')),
+('Pagani', 'San Cesario sul Panaro', '01.01.1992', 162, BYTEA('Logos/419-4194037_pagani-logo-zeichen-vektor-bedeutendes-und-geschichtezeichen-pagani.png')),
+('Porsche', 'Stuttgart', '06.03.1931', 36359, BYTEA('Logos/porsche-1931-present-e1650385475287.png')),
+('Rolls-Royce', 'Goodwood', '01.03.1998', 1300, BYTEA('Logos/Rolls-Royce-1906-Presente.jpg')),
+('Skoda', 'Mladá Boleslav', '17.12.1895', 36032, BYTEA('Logos/288-2887790_skoda-logo-png-transparent-png.png')),
+('Subaru', 'Shibuya', '15.07.1953', 16961, BYTEA('Logos/216cf0e9-4ade-437a-a405-8cbb9c57a9b5-4865487.jpeg')),
+('Tesla', 'Austin', '01.07.2003', 127855, BYTEA('Logos/tesla-big.png')),
+('Toyota', 'Koromo', '28.08.1937', 366283, BYTEA('Logos/Toyota-Motor-Logo-Transparent-Images.png')),
+('Volkswagen', 'Wolfsburg', '28.05.1937', 670000, BYTEA('Logos/logonew.jpg'));
 
 INSERT INTO models_range(company_id, model_name)
 SELECT id, UNNEST (ARRAY['CSX', 'Integra', 'MDX', 'NSX']) from companies where name = 'Acura';
