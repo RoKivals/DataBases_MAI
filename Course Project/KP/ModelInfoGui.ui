@@ -65,36 +65,19 @@
      <string>Информация</string>
     </property>
    </widget>
-   <widget class="QLabel" name="ModelPicLabel">
-    <property name="geometry">
-     <rect>
-      <x>470</x>
-      <y>50</y>
-      <width>300</width>
-      <height>300</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="pixmap">
-     <pixmap>C:/Users/T/Pictures/Screenshots/Снимок экрана 2023-12-15 000143.png</pixmap>
-    </property>
-    <property name="scaledContents">
-     <bool>false</bool>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-   </widget>
    <widget class="QLabel" name="ModelNameLabel">
     <property name="geometry">
      <rect>
-      <x>470</x>
+      <x>320</x>
       <y>30</y>
-      <width>300</width>
-      <height>20</height>
+      <width>401</width>
+      <height>31</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>20</pointsize>
+     </font>
     </property>
     <property name="text">
      <string>Имя модели</string>
@@ -106,8 +89,8 @@
    <widget class="QTableWidget" name="SpecTable">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>220</y>
+      <x>320</x>
+      <y>100</y>
       <width>400</width>
       <height>350</height>
      </rect>
@@ -116,14 +99,40 @@
    <widget class="QPushButton" name="BackButton">
     <property name="geometry">
      <rect>
-      <x>550</x>
-      <y>370</y>
+      <x>30</x>
+      <y>460</y>
       <width>135</width>
       <height>60</height>
      </rect>
     </property>
     <property name="text">
      <string>Назад</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="EditButton">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>460</y>
+      <width>150</width>
+      <height>60</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Изменить</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="DeletButton">
+    <property name="geometry">
+     <rect>
+      <x>570</x>
+      <y>460</y>
+      <width>150</width>
+      <height>60</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Удалить</string>
     </property>
    </widget>
   </widget>

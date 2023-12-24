@@ -107,6 +107,19 @@
       <string>Назад</string>
      </property>
     </widget>
+    <widget class="QPushButton" name="AddButton">
+     <property name="geometry">
+      <rect>
+       <x>130</x>
+       <y>500</y>
+       <width>135</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Добавить</string>
+     </property>
+    </widget>
    </widget>
   </widget>
  </widget>
