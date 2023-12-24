@@ -17,14 +17,24 @@ from psycopg2 import Error
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import AuthGui
 
-
 try:
-    # Подключение к существующей базе данных
-    connection = psycopg2.connect(dbname=DBNAME, user=USER,
-                                  # пароль, который указали при установке PostgreSQL
-                                  password=PASSWORD,
-                                  host=HOST,
-                                  port=PORT)
+    # # Подключение к существующей базе данных
+    # connection = psycopg2.connect(dbname=DBNAME, user=USER,
+    #                               # пароль, который указали при установке PostgreSQL
+    #                               password=PASSWORD,
+    #                               host=HOST,
+    #                               port=PORT)
+
+    connection = psycopg2.connect("""
+        host=rc1b-j5btgqi1xzjkfz71.mdb.yandexcloud.net
+        port=6432
+        sslmode=verify-full
+        dbname=db
+        user=main
+        password=sQ7-v9J-p5c-B3P
+        target_session_attrs=read-write
+        sslrootcert=C:/Users/slava/.postgresql/root.crt
+    """)
     # Курсор для выполнения операций с базой данных
     cursor = connection.cursor()
     # Распечатать сведения о PostgreSQL
@@ -94,9 +104,9 @@ class BrandWindow(QtWidgets.QMainWindow, Gui.Ui_MainWindow):
     def set_brand(self, brand):
         self.NameLabel.setText(brand)
         self.cur.execute(f'select logo from companies where name = \'{brand}\'')
-        res = self.cur.fetchone()[0]
+        file_path = self.cur.fetchone()[0]
         pixmap = QPixmap()
-        pixmap.loadFromData(res)
+        pixmap.loadFromData(f"../{file_path}")
         self.PicLabel.setPixmap(pixmap)
 
     def get_brand(self):
@@ -330,7 +340,8 @@ class AuthWindow(QtWidgets.QMainWindow, AuthGui.Ui_MainWindow):
         if res:
             self.NotificationReg.setText("Такой пользователь уже зарегистрирован")
         else:
-            self.cur.execute(f'INSERT INTO auth.users (login, password, category) VALUES (\'{login}\', \'{password}\', \'user\');')
+            self.cur.execute(
+                f'INSERT INTO auth.users (login, password, category) VALUES (\'{login}\', \'{password}\', \'user\');')
             global law
             law = 1
             self.NotificationReg.setText("")
@@ -345,6 +356,7 @@ class AuthWindow(QtWidgets.QMainWindow, AuthGui.Ui_MainWindow):
     def reg_window(self):
         self.regWidget.setVisible(True)
         self.authWidget.setVisible(False)
+
 
 # endregion
 
@@ -367,7 +379,6 @@ class BrandAddDialog(QtWidgets.QDialog, AddGui.Ui_Dialog):
         self.SpecTable.setHorizontalHeaderLabels(['Параметры', 'Значения'])
         for i in range(len(res)):
             self.SpecTable.setItem(i, 0, QTableWidgetItem(res[i]))
-
 
     def back(self):
         self.close()
@@ -397,7 +408,7 @@ class ModelAddDialog(QtWidgets.QDialog, AddGui.Ui_Dialog):
         res.pop(0)
         res.pop(0)
         self.SpecTable.setColumnCount(2)
-        self.SpecTable.setRowCount(len(res)+1)
+        self.SpecTable.setRowCount(len(res) + 1)
         self.SpecTable.setHorizontalHeaderLabels(['Параметры', 'Значения'])
         self.SpecTable.setItem(0, 0, QTableWidgetItem("model_name"))
         for i in range(1, len(res) + 1):
@@ -443,7 +454,8 @@ class ModelEditDialog(QtWidgets.QDialog, EditGui.Ui_Dialog):
         self.cur.execute(f'SELECT id from specification '
                          f'WHERE model_id = (SELECT id from models_range where model_name = \'{self.model}\')')
         res = self.cur.fetchone()[0]
-        self.cur.execute(f'UPDATE specification set {self.SpecNameLabel.text()} = \'{self.SpecLine.text()}\' where id = {res}')
+        self.cur.execute(
+            f'UPDATE specification set {self.SpecNameLabel.text()} = \'{self.SpecLine.text()}\' where id = {res}')
         self.set_table()
 
     def back(self):
@@ -530,8 +542,9 @@ class DeleteDialog(QtWidgets.QDialog, DeleteGui.Ui_Dialog):
 
 if __name__ == '__main__':  # Если мы запускаем файл напрямую, а не импортируем
     app = QtWidgets.QApplication(sys.argv)  # Новый экземпляр QApplication
-    #window = BrandWindow(cursor)  # Создаём объект класса ExampleApp
     law = None
+    #window = BrandWindow(cursor)  # Создаём объект класса ExampleApp
+
     window = AuthWindow(cursor)
     window.show()  # Показываем окно
     app.exec_()
