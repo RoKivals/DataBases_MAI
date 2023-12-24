@@ -117,6 +117,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS uix_model_name ON models_range (model_name);
 CREATE UNIQUE INDEX IF NOT EXISTS uix_sales_market_market_zone ON sales_markets (market_zone);
 CREATE UNIQUE INDEX IF NOT EXISTS uix_models_sales_markets_relation ON models_sales_markets_relation (model_id, sales_market_id);
 
+INSERT INTO auth.users (login, password, category) VALUES
+('123', '123', 'admin')
+
 INSERT
 INTO sales_markets (market_zone) VALUES 
 ('Europe'),
