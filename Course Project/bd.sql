@@ -47,7 +47,7 @@ CREATE TABLE companies(
     office varchar(255) NOT NULL,
     creation_date date NOT NULL,
     count_of_workers int,
-	logo varchar(100)
+	logo varchar(255)
 );
 
 CREATE TABLE specification (

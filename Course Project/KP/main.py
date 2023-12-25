@@ -18,23 +18,13 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import AuthGui
 
 try:
-    # # Подключение к существующей базе данных
-    # connection = psycopg2.connect(dbname=DBNAME, user=USER,
-    #                               # пароль, который указали при установке PostgreSQL
-    #                               password=PASSWORD,
-    #                               host=HOST,
-    #                               port=PORT)
+    # Подключение к существующей базе данных
+    connection = psycopg2.connect(dbname=DBNAME, user=USER,
+                                  # пароль, который указали при установке PostgreSQL
+                                  password=PASSWORD,
+                                  host=HOST,
+                                  port=PORT)
 
-    connection = psycopg2.connect("""
-        host=rc1b-j5btgqi1xzjkfz71.mdb.yandexcloud.net
-        port=6432
-        sslmode=verify-full
-        dbname=db
-        user=main
-        password=sQ7-v9J-p5c-B3P
-        target_session_attrs=read-write
-        sslrootcert=C:/Users/slava/.postgresql/root.crt
-    """)
     # Курсор для выполнения операций с базой данных
     cursor = connection.cursor()
     # Распечатать сведения о PostgreSQL
@@ -106,7 +96,7 @@ class BrandWindow(QtWidgets.QMainWindow, Gui.Ui_MainWindow):
         self.cur.execute(f'select logo from companies where name = \'{brand}\'')
         file_path = self.cur.fetchone()[0]
         pixmap = QPixmap()
-        pixmap.loadFromData(f"../{file_path}")
+        pixmap.load(f"../{file_path}")
         self.PicLabel.setPixmap(pixmap)
 
     def get_brand(self):
@@ -343,7 +333,7 @@ class AuthWindow(QtWidgets.QMainWindow, AuthGui.Ui_MainWindow):
             self.cur.execute(
                 f'INSERT INTO auth.users (login, password, category) VALUES (\'{login}\', \'{password}\', \'user\');')
             global law
-            law = 1
+            law = 0
             self.NotificationReg.setText("")
             self.next_window()
 
@@ -379,6 +369,7 @@ class BrandAddDialog(QtWidgets.QDialog, AddGui.Ui_Dialog):
         self.SpecTable.setHorizontalHeaderLabels(['Параметры', 'Значения'])
         for i in range(len(res)):
             self.SpecTable.setItem(i, 0, QTableWidgetItem(res[i]))
+            self.SpecTable.setItem(i, 1, QTableWidgetItem(''))
 
     def back(self):
         self.close()
@@ -387,8 +378,12 @@ class BrandAddDialog(QtWidgets.QDialog, AddGui.Ui_Dialog):
         lst = list()
         for i in range(self.SpecTable.rowCount()):
             lst.append(self.SpecTable.item(i, 1).text())
-        self.cur.execute(f'INSERT INTO companies (name, office, creation_date, count_of_workers) VALUES'
-                         f' (\'{lst[0]}\', \'{lst[1]}\', \'{lst[2]}\', {lst[3]});')
+        self.cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'companies';")
+        res = [i[0] for i in self.cur.fetchall()]
+        res.pop(0)
+        res.pop()
+        self.cur.execute(f"INSERT INTO companies ({', '.join(res)}) VALUES"
+                         f" (\'{lst[0]}\', \'{lst[1]}\', \'{lst[2]}\', \'{lst[3]}\');")
         self.close()
 
 
@@ -405,31 +400,41 @@ class ModelAddDialog(QtWidgets.QDialog, AddGui.Ui_Dialog):
     def set_table(self):
         self.cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'specification';")
         res = [i[0] for i in self.cur.fetchall()]
-        res.pop(0)
-        res.pop(0)
+        dct = dict().fromkeys(res)
+        dct.pop('id')
+        dct.pop('model_id')
+
+        keys = list(dct.keys())
         self.SpecTable.setColumnCount(2)
-        self.SpecTable.setRowCount(len(res) + 1)
+        self.SpecTable.setRowCount(len(keys)+1)
         self.SpecTable.setHorizontalHeaderLabels(['Параметры', 'Значения'])
         self.SpecTable.setItem(0, 0, QTableWidgetItem("model_name"))
-        for i in range(1, len(res) + 1):
-            self.SpecTable.setItem(i, 0, QTableWidgetItem(res[i - 1]))
+        for i in range(1, len(keys) + 1):
+            self.SpecTable.setItem(i, 0, QTableWidgetItem(keys[i - 1]))
+            self.SpecTable.setItem(i, 1, QTableWidgetItem(''))
 
     def back(self):
         self.close()
 
     def complete(self):
-        lst = list()
+        dct = dict()
         for i in range(self.SpecTable.rowCount()):
-            lst.append(self.SpecTable.item(i, 1).text())
+            dct[self.SpecTable.item(i, 0).text()] = self.SpecTable.item(i, 1).text()
 
-        self.cur.execute(f'INSERT INTO models_range(company_id, model_name) SELECT id, \'{lst[0]}\' '
-                         f'from companies where name = \'{self.brand}\';')
-        self.cur.execute(f'INSERT INTO '
-                         f'specification(model_id, generation, start_of_production, end_of_production, '
-                         f'engine, engine_displacement, HP, body_type)'
-                         f' WITH model AS (SELECT id from models_range WHERE model_name = \'{lst[0]}\') '
-                         f'SELECT model.id, \'{lst[1]}\', \'{lst[2]}\', \'{lst[3]}\', \'{lst[4]}\','
-                         f' {lst[5]}, {lst[6]}, {lst[7]} from model;')
+        end_prod = dct.get('end_of_production', 'NULL')
+        if end_prod != '':
+            end_prod = f'\'{end_prod}\''
+        else:
+            end_prod = 'NULL'
+
+        self.cur.execute(f"INSERT INTO models_range(company_id, model_name) SELECT id, \'{dct['model_name']}\' "
+                         f"from companies where name = \'{self.brand}\';")
+        self.cur.execute(f"INSERT INTO "
+                         f"specification(model_id, generation, start_of_production, end_of_production, "
+                         f"engine, engine_displacement, HP, body_type)"
+                         f" WITH model AS (SELECT id from models_range WHERE model_name = \'{dct['model_name']}\') "
+                         f"SELECT model.id, \'{dct['generation']}\', \'{dct['start_of_production']}\', {end_prod}, \'{dct['engine']}\',"
+                         f" {dct['engine_displacement']}, {dct['hp']}, {dct['body_type']} from model;")
         self.close()
 
 
@@ -543,7 +548,7 @@ class DeleteDialog(QtWidgets.QDialog, DeleteGui.Ui_Dialog):
 if __name__ == '__main__':  # Если мы запускаем файл напрямую, а не импортируем
     app = QtWidgets.QApplication(sys.argv)  # Новый экземпляр QApplication
     law = None
-    #window = BrandWindow(cursor)  # Создаём объект класса ExampleApp
+    # window = BrandWindow(cursor)  # Создаём объект класса ExampleApp
 
     window = AuthWindow(cursor)
     window.show()  # Показываем окно
