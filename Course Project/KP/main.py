@@ -12,18 +12,20 @@ import ModelInfoGui
 import BrandInfoGui
 from config import *
 import psycopg2
-import datetime
 from psycopg2 import Error
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import AuthGui
 
 try:
-    # Подключение к существующей базе данных
+    
+     # Подключение к существующей базе данных
     connection = psycopg2.connect(dbname=DBNAME, user=USER,
-                                  # пароль, который указали при установке PostgreSQL
-                                  password=PASSWORD,
-                                  host=HOST,
-                                  port=PORT)
+                                   # пароль, который указали при установке PostgreSQL
+                                   password=PASSWORD,
+                                   host=HOST,
+                                   port=PORT)
+
+   
 
     # Курсор для выполнения операций с базой данных
     cursor = connection.cursor()
@@ -66,13 +68,11 @@ class BrandWindow(QtWidgets.QMainWindow, Gui.Ui_MainWindow):
 
     def auth_window(self):
         global window
-
         window = AuthWindow(self.cur)
         window.show()
 
     def info_window(self):
         global window
-
         window = BrandInfoWindow(self.cur, self.NameLabel.text())
         window.show()
 
@@ -82,9 +82,8 @@ class BrandWindow(QtWidgets.QMainWindow, Gui.Ui_MainWindow):
         window.show()
 
     def set_brands_list(self):
-        self.cur.execute("SELECT name FROM companies;")
+        self.cur.execute("SELECT name FROM companies ORDER BY name;")
         res = [i[0] for i in self.cur.fetchall()]
-        res.sort()
         for i in res:
             item = QListWidgetItem(i)
             self.ListWidget.addItem(item)
@@ -281,16 +280,40 @@ class BrandInfoWindow(QtWidgets.QMainWindow, BrandInfoGui.Ui_MainWindow):
         window = ModelWindow(self.cur, self.BrandNameLabel.text())
         window.show()
 
+    def complete(self):
+        dct = dict()
+        for i in range(self.SpecTable.rowCount()):
+            dct[self.SpecTable.item(i, 0).text()] = self.SpecTable.item(i, 1).text()
+
+        end_prod = dct.get('end_of_production', 'NULL')
+        if end_prod != '':
+            end_prod = f'\'{end_prod}\''
+        else:
+            end_prod = 'NULL'
+
+        self.cur.execute(f"INSERT INTO models_range(company_id, model_name) SELECT id, \'{dct['model_name']}\' "
+                         f"from companies where name = \'{self.brand}\';")
+        self.cur.execute(f"INSERT INTO "
+                         f"specification(model_id, generation, start_of_production, end_of_production, "
+                         f"engine, engine_displacement, HP, body_type)"
+                         f" WITH model AS (SELECT id from models_range WHERE model_name = \'{dct['model_name']}\') "
+                         f"SELECT model.id, \'{dct['generation']}\', \'{dct['start_of_production']}\', {end_prod}, \'{dct['engine']}\',"
+                         f" {dct['engine_displacement']}, {dct['hp']}, {dct['body_type']} from model;")
+        self.close()
+
     def set_info_table(self):
-        self.cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'companies';")
+        dct = dict()
+
+        self.cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'companies' "
+                         "ORDER BY ordinal_position;")
         res = [i[0] for i in self.cur.fetchall()]
+
         self.cur.execute(f'SELECT * FROM companies where name = \'{self.BrandNameLabel.text()}\';')
-        res2 = list(self.cur.fetchall()[0])
-        for i in range(len(res2)):
-            res2[i] = str(res2[i])
+        res2 = list(map(str, self.cur.fetchall()[0]))
         self.InfoTable.setColumnCount(2)
         self.InfoTable.setRowCount(len(res))
         self.InfoTable.setHorizontalHeaderLabels(['Параметры', 'Значения'])
+
         for i in range(len(res)):
             self.InfoTable.setItem(i, 0, QTableWidgetItem(res[i]))
             self.InfoTable.setItem(i, 1, QTableWidgetItem(res2[i]))
@@ -406,7 +429,7 @@ class ModelAddDialog(QtWidgets.QDialog, AddGui.Ui_Dialog):
 
         keys = list(dct.keys())
         self.SpecTable.setColumnCount(2)
-        self.SpecTable.setRowCount(len(keys)+1)
+        self.SpecTable.setRowCount(len(keys) + 1)
         self.SpecTable.setHorizontalHeaderLabels(['Параметры', 'Значения'])
         self.SpecTable.setItem(0, 0, QTableWidgetItem("model_name"))
         for i in range(1, len(keys) + 1):

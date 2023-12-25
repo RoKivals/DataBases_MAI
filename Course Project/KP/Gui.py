@@ -39,6 +39,7 @@ class Ui_MainWindow(object):
         self.PicLabel.setPixmap(QtGui.QPixmap("C:/Users/T/Pictures/FPNorKVUcCcp3Oh.jpg"))
         self.PicLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.PicLabel.setObjectName("PicLabel")
+        self.PicLabel.setScaledContents(True)
         self.BackButton = QtWidgets.QPushButton(self.InfoWidget)
         self.BackButton.setGeometry(QtCore.QRect(0, 500, 135, 41))
         self.BackButton.setObjectName("BackButton")
