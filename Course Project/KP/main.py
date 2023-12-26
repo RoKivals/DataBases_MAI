@@ -1,20 +1,22 @@
 import sys
+import yaml
+from config import *
+from MagazineUser import User
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QListWidgetItem, QTableWidgetItem
+from PyQt5.QtGui import QPixmap
 
+import AuthGui
 import DeleteGui
 import EditGui
 import AddGui
 import Gui
-from PyQt5.QtGui import QPixmap
 import ModelInfoGui
 import BrandInfoGui
-from config import *
+
 import psycopg2
 from psycopg2 import Error
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
-import AuthGui
 
 try:
     # Подключение к существующей базе данных
@@ -40,17 +42,21 @@ except (Exception, Error) as error:
 
 # region
 class BrandWindow(QtWidgets.QMainWindow, Gui.Ui_MainWindow):
+
     def __init__(self, cursor):
         super().__init__()
         self.cur = cursor
         self.setupUi(self)
         self.setFixedSize(800, 600)
+
         global law
         if not law:
             self.AddButton.setVisible(False)
+
+        self.set_brands_list()
+
         self.AddButton.clicked.connect(self.add_window)
         self.NextButton.clicked.connect(self.next_window)
-        self.set_brands_list()
         self.BackButton.clicked.connect(self.auth_window)
         self.ListWidget.clicked.connect(self.get_brand)
         self.InfoButton.clicked.connect(self.info_window)
@@ -320,55 +326,67 @@ class AuthWindow(QtWidgets.QMainWindow, AuthGui.Ui_MainWindow):
     def __init__(self, cursor):
         super().__init__()
         self.setupUi(self)
-        self.cur = cursor
         self.setFixedSize(800, 600)
-        self.AuthRegButton.clicked.connect(self.reg_window)
+
+        # Connect funtions to buttons
         self.AuthAuthButton.clicked.connect(self.auth_handle)
+        self.AuthRegButton.clicked.connect(self.open_registration_widget)
         self.RegRegButton.clicked.connect(self.reg_handle)
+
+        self.cur = cursor
 
     def auth_handle(self):
         login = self.LoginAuthLine.text()
         password = self.PasswordAuthLine.text()
+        # password = hash(self.PasswordAuthLine.text())
+
         self.cur.execute(f'SELECT category from auth.users where login = \'{login}\' and password = \'{password}\'')
-        res = self.cur.fetchone()
-        if res:
-            if res[0] == 'user':
+        user_type = self.cur.fetchone()
+        if user_type:
+            user = User(login, user_type[0])
+            if user_type[0] == 'user':
                 global law
                 law = 0
             else:
                 law = 1
-            print('law = ', law)
-            self.next_window()
+            self.start_brand_window()
         else:
-            self.NotificationAuth.setText('Ошибка в данных для входа')
+            self.NotificationAuth.setText('Неверные данные')
 
     def reg_handle(self):
         login = self.LoginRegLine.text()
         password = self.PasswordRegLine.text()
-        self.cur.execute(f'SELECT login, password from auth.users where login = \'{login}\';')
-        res = self.cur.fetchone()
-        if res:
-            self.NotificationReg.setText("Такой пользователь уже зарегистрирован")
-        else:
+        # password = hash(self.PasswordRegLine.text())
+
+        try:
+            print(login, password, sep='____')
             self.cur.execute(
-                f'INSERT INTO auth.users (login, password, category) VALUES (\'{login}\', \'{password}\', \'user\');')
+                f'INSERT INTO auth.users (login, password, category) VALUES (\'{login}\', \'{password}\', \'user\');'
+            )
+            user = User(login, 'user')
             global law
             law = 0
             self.NotificationReg.setText("")
-            self.next_window()
+            self.start_brand_window()
 
-    def next_window(self):
+        except Exception as e:
+            self.NotificationReg.setText("Такой пользователь уже зарегистрирован")
+            self.cur.execute("ROLLBACK;")
+            print("Ошибка при работе с PostgreSQL", e)
+
+    def start_brand_window(self):
         global window
 
         window = BrandWindow(self.cur)
         window.show()
 
-    def reg_window(self):
+    def open_registration_widget(self):
         self.regWidget.setVisible(True)
         self.authWidget.setVisible(False)
 
-
-# endregion
+        # transferring data from the authorization window
+        self.LoginRegLine.setText(self.LoginAuthLine.text())
+        self.PasswordRegLine.setText(self.PasswordAuthLine.text())
 
 
 class BrandAddDialog(QtWidgets.QDialog, AddGui.Ui_Dialog):
@@ -565,11 +583,10 @@ class DeleteDialog(QtWidgets.QDialog, DeleteGui.Ui_Dialog):
         self.close()
 
 
-if __name__ == '__main__':  # Если мы запускаем файл напрямую, а не импортируем
+if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)  # Новый экземпляр QApplication
-    law = None
-    # window = BrandWindow(cursor)  # Создаём объект класса ExampleApp
 
+    law = None
     window = AuthWindow(cursor)
     window.show()  # Показываем окно
     app.exec_()

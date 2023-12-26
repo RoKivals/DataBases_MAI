@@ -49,7 +49,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Бренды"))
         self.BrandNameLabel.setText(_translate("MainWindow", "Имя Бренда"))
         self.BackButton.setText(_translate("MainWindow", "Назад"))
         self.NextButton.setText(_translate("MainWindow", "Модели"))

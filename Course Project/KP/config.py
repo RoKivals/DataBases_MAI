@@ -1,5 +1,5 @@
 USER = "postgres"
-PASSWORD = "123"
+PASSWORD = "Agent007"
 HOST = "127.0.0.1"
 PORT = "5432"
-DBNAME = "Main"
+DBNAME = "postgres"

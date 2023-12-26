@@ -6,6 +6,7 @@ DROP TABLE IF EXISTS sales_markets CASCADE;
 DROP TABLE IF EXISTS companies CASCADE;
 DROP TABLE IF EXISTS models_range CASCADE;
 DROP TABLE IF EXISTS models_sales_markets_relation CASCADE;
+DROP TABLE IF EXISTS model_body_type_relation CASCADE;
 DROP TABLE IF EXISTS body_type CASCADE;
 DROP TYPE IF EXISTS engine_type CASCADE;
 DROP FUNCTION IF EXISTS set_model_body_type_relation_function CASCADE;
@@ -21,7 +22,8 @@ CREATE TABLE auth.users (
 	id bigserial primary key,
 	login varchar(55),
 	password varchar(100),
-	category auth.user_type
+	category auth.user_type,
+    UNIQUE (login)
 );
 
 CREATE TYPE engine_type AS ENUM (
@@ -120,6 +122,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS uix_model_name ON models_range (model_name);
 CREATE UNIQUE INDEX IF NOT EXISTS uix_sales_market_market_zone ON sales_markets (market_zone);
 CREATE UNIQUE INDEX IF NOT EXISTS uix_models_sales_markets_relation ON models_sales_markets_relation (model_id, sales_market_id);
 
+INSERT INTO auth.users (login, password, category) VALUES
+('123', '123', 'admin')
+
 INSERT
 INTO sales_markets (market_zone) VALUES 
 ('Europe'),
@@ -149,9 +154,6 @@ INTO body_type (name) VALUES
 ('Campervan'),
 ('Quad bike');
 
----
---- Папку Logos необходимо поместить в корневую папку Postgres
----
 
 INSERT
 INTO companies (name, office, creation_date, count_of_workers, logo) VALUES
